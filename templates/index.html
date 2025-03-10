@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Planning Assistant</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="mdc-typography">
+    <header class="mdc-top-app-bar">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <span class="mdc-top-app-bar__title">Tax Planning Assistant</span>
+            </section>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="mdc-card main-card">
+            <div class="card-content">
+                <h2 class="mdc-typography--headline4">Tax Document Analysis</h2>
+                
+                <form id="taxForm" class="tax-form">
+                    <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+                        <div class="mdc-select mdc-select--filled" id="tax-status-select">
+                            <div class="mdc-select__anchor" role="button" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="mdc-select__ripple"></span>
+                                <span class="mdc-floating-label">Tax Filing Status</span>
+                                <span class="mdc-select__selected-text"></span>
+                                <span class="mdc-select__dropdown-icon">
+                                    <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5">
+                                        <polygon class="mdc-select__dropdown-icon-inactive" stroke="none" fill-rule="evenodd" points="7 10 12 15 17 10"></polygon>
+                                        <polygon class="mdc-select__dropdown-icon-active" stroke="none" fill-rule="evenodd" points="7 15 12 10 17 15"></polygon>
+                                    </svg>
+                                </span>
+                                <span class="mdc-line-ripple"></span>
+                            </div>
+
+                            <div class="mdc-select__menu mdc-menu mdc-menu-surface mdc-menu-surface--fullwidth">
+                                <ul class="mdc-list" role="listbox">
+                                    <li class="mdc-list-item mdc-list-item--selected" data-value="single" role="option">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <span class="mdc-list-item__text">Single</span>
+                                    </li>
+                                    <li class="mdc-list-item" data-value="married_jointly" role="option">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <span class="mdc-list-item__text">Married Filing Jointly</span>
+                                    </li>
+                                    <li class="mdc-list-item" data-value="married_separate" role="option">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <span class="mdc-list-item__text">Married Filing Separately</span>
+                                    </li>
+                                    <li class="mdc-list-item" data-value="head_household" role="option">
+                                        <span class="mdc-list-item__ripple"></span>
+                                        <span class="mdc-list-item__text">Head of Household</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <p class="mdc-select-helper-text mdc-select-helper-text--validation-msg" id="tax-status-error" aria-hidden="true"></p>
+                        </div>
+                    </div>
+
+                    <div class="file-upload-container">
+                        <div class="mdc-typography--subtitle1">Upload Tax Documents</div>
+                        <div class="file-input-wrapper">
+                            <i class="material-icons-round upload-icon">cloud_upload</i>
+                            <p class="upload-text">Drag and drop your files here or</p>
+                            <label class="mdc-button mdc-button--raised">
+                                <span class="mdc-button__ripple"></span>
+                                <i class="material-icons-round mdc-button__icon">file_upload</i>
+                                <span class="mdc-button__label">Choose Files</span>
+                                <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                            </label>
+                            <div class="mdc-typography--caption">Supported formats: PDF, JPG, PNG</div>
+                            <div id="fileList" class="mdc-typography--body2"></div>
+                        </div>
+                    </div>
+
+                    <button class="mdc-button mdc-button--raised submit-button" type="submit">
+                        <span class="mdc-button__ripple"></span>
+                        <i class="material-icons-round mdc-button__icon">analytics</i>
+                        <span class="mdc-button__label">Process Documents</span>
+                    </button>
+                </form>
+
+                <div id="results" class="mdc-card" style="display: none;">
+                    <div class="mdc-card__content">
+                        <h2 class="mdc-typography--headline5">Tax Analysis Results</h2>
+                        
+                        <!-- Processing Information -->
+                        <div class="mdc-card__section">
+                            <h3 class="mdc-typography--subtitle1">Processing Information</h3>
+                            <table class="mdc-data-table__table">
+                                <tbody class="mdc-data-table__content">
+                                    <tr class="mdc-data-table__row">
+                                        <td class="mdc-data-table__cell mdc-data-table__cell--non-numeric">Filing Status</td>
+                                        <td class="mdc-data-table__cell" id="filingStatus">Single</td>
+                                    </tr>
+                                    <tr class="mdc-data-table__row" id="individualsRow" style="display: none;">
+                                        <td class="mdc-data-table__cell mdc-data-table__cell--non-numeric">Individuals</td>
+                                        <td class="mdc-data-table__cell" id="individualsNames"></td>
+                                    </tr>
+                                    <tr class="mdc-data-table__row">
+                                        <td class="mdc-data-table__cell mdc-data-table__cell--non-numeric">Processed Files</td>
+                                        <td class="mdc-data-table__cell" id="processedFiles"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Warnings Section -->
+                        <div id="warningsContainer" class="mdc-card__section warning-section" style="display: none;">
+                            <h3 class="mdc-typography--subtitle1">Warnings</h3>
+                            <div class="mdc-typography--body2" id="warnings">
+                                <!-- Warning messages will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Income Breakdown -->
+                        <div class="income-breakdown-card">
+                            <h4 class="mdc-typography--headline6">Income Breakdown</h4>
+                            <div class="mdc-data-table">
+                                <table class="mdc-data-table__table">
+                                    <tbody>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Wages, Salaries, Tips</td>
+                                            <td class="mdc-data-table__cell" id="wagesAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Interest Income</td>
+                                            <td class="mdc-data-table__cell" id="interestAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Dividend Income</td>
+                                            <td class="mdc-data-table__cell" id="dividendsAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Business Income</td>
+                                            <td class="mdc-data-table__cell" id="businessAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Capital Gains</td>
+                                            <td class="mdc-data-table__cell" id="capitalGainsAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">IRA Distributions</td>
+                                            <td class="mdc-data-table__cell" id="iraAmount">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row total-row">
+                                            <td class="mdc-data-table__cell"><strong>Total Income</strong></td>
+                                            <td class="mdc-data-table__cell" id="totalIncome"><strong>$0.00</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Tax Calculation -->
+                        <div class="tax-calculation-card">
+                            <h4 class="mdc-typography--headline6">Tax Calculation</h4>
+                            <div class="mdc-data-table">
+                                <table class="mdc-data-table__table">
+                                    <tbody>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Total Income</td>
+                                            <td class="mdc-data-table__cell" id="calcTotalIncome">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Total Deductions</td>
+                                            <td class="mdc-data-table__cell" id="totalDeductions">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Taxable Income</td>
+                                            <td class="mdc-data-table__cell" id="taxableIncome">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Calculated Tax</td>
+                                            <td class="mdc-data-table__cell" id="calculatedTax">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row">
+                                            <td class="mdc-data-table__cell">Tax Payments/Withholding</td>
+                                            <td class="mdc-data-table__cell" id="taxPayments">$0.00</td>
+                                        </tr>
+                                        <tr class="mdc-data-table__row total-row">
+                                            <td class="mdc-data-table__cell"><strong>Tax Due/Refund</strong></td>
+                                            <td class="mdc-data-table__cell" id="taxDue"><strong>$0.00</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
